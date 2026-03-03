@@ -1,0 +1,14 @@
+# ── Install order matters for PyTorch on Windows ──────────────────────────────
+#
+# Step 1: install PyTorch first (CPU version shown; for GPU see pytorch.org)
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#
+# Step 2: then install the rest
+#   pip install -r requirements.txt
+#
+# Python 3.9+ recommended
+
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+matplotlib>=3.7.0
