@@ -1,0 +1,7 @@
+optimizer,final_loss,final_val_acc,epochs_to_90pct,total_time_sec,gradient_evals
+SGD,0.8335,0.719,24,527.0,10560
+SGD+Mom,0.65258,0.7666,9,526.9,10560
+Adam,0.79889,0.7296,14,533.4,10560
+RMSprop,0.89626,0.7036,23,530.4,10560
+Adagrad,1.01885,0.6742,30,524.7,10560
+LBFGS,nan,0.0976,30,1860.7,211191
