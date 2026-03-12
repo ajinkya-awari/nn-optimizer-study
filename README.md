@@ -10,11 +10,11 @@
 
 ## Motivation
 
-The standard narrative in optimization for deep learning treats faster convergence as an unambiguous improvement. Adaptive methods — Adam, RMSprop — reduce training loss faster than SGD in virtually every benchmark. Yet practitioners have consistently observed that SGD with momentum often generalizes better than Adam on image classification, despite converging more slowly.
+The standard narrative in optimization for deep learning treats faster convergence as an unambiguous improvement. Adaptive methods Adam, RMSprop reduce training loss faster than SGD in virtually every benchmark. Yet practitioners have consistently observed that SGD with momentum often generalizes better than Adam on image classification, despite converging more slowly.
 
-This tension between convergence speed and generalization quality is not well explained by classical optimization theory, which analyzes convergence to a minimum without accounting for *which* minimum is found. Loss landscape geometry offers a partial explanation: SGD tends to converge to flatter minima, while adaptive methods converge to sharper basins — and flatter minima are empirically associated with better generalization under distribution shift.
+This tension between convergence speed and generalization quality is not well explained by classical optimization theory, which analyzes convergence to a minimum without accounting for *which* minimum is found. Loss landscape geometry offers a partial explanation: SGD tends to converge to flatter minima, while adaptive methods converge to sharper basins and flatter minima are empirically associated with better generalization under distribution shift.
 
-A second motivation comes from distributed training. As models scale, gradient communication between workers becomes a critical bottleneck. Compression methods such as PowerSGD (Vogels et al., 2019) exploit low-rank structure in gradient matrices to reduce communication cost. But the compressibility of gradients is not optimizer-independent — it depends on how the optimizer shapes gradient magnitudes and sparsity patterns throughout training. Understanding optimizer behavior at the single-machine level is therefore a prerequisite for designing communication-efficient distributed algorithms.
+A second motivation comes from distributed training. As models scale, gradient communication between workers becomes a critical bottleneck. Compression methods such as PowerSGD (Vogels et al., 2019) exploit low-rank structure in gradient matrices to reduce communication cost. But the compressibility of gradients is not optimizer-independent  it depends on how the optimizer shapes gradient magnitudes and sparsity patterns throughout training. Understanding optimizer behavior at the single-machine level is therefore a prerequisite for designing communication-efficient distributed algorithms.
 
 This project investigates both dimensions: the generalization-speed tradeoff across first- and second-order methods, and the implications for gradient compressibility in distributed training settings.
 
@@ -22,13 +22,13 @@ This project investigates both dimensions: the generalization-speed tradeoff acr
 
 ## Research Questions
 
-1. **Convergence vs. generalization tradeoff** — Do adaptive methods that converge faster systematically converge to sharper loss minima, and does this explain observed generalization gaps?
+1. **Convergence vs. generalization tradeoff** - Do adaptive methods that converge faster systematically converge to sharper loss minima, and does this explain observed generalization gaps?
 
-2. **Loss landscape geometry** — Can filter-normalized loss surface visualizations characterize the qualitative differences in minima found by SGD, momentum, and adaptive optimizers?
+2. **Loss landscape geometry** - Can filter-normalized loss surface visualizations characterize the qualitative differences in minima found by SGD, momentum, and adaptive optimizers?
 
-3. **Gradient compressibility** — Do different optimizers produce gradients with different sparsity and low-rank structure over the course of training, and which optimizer produces the most compressible gradient signal?
+3. **Gradient compressibility** - Do different optimizers produce gradients with different sparsity and low-rank structure over the course of training, and which optimizer produces the most compressible gradient signal?
 
-4. **Second-order methods in the stochastic setting** — Under what conditions does the curvature information in L-BFGS become unreliable, and how does gradient noise interact with the Hessian approximation?
+4. **Second-order methods in the stochastic setting** - Under what conditions does the curvature information in L-BFGS become unreliable, and how does gradient noise interact with the Hessian approximation?
 
 ---
 
@@ -59,7 +59,7 @@ SGD and SGD+Momentum are implemented from scratch in `optimizers.py` without PyT
 
 ### Architecture and Dataset
 
-A shallow CNN trained on CIFAR-10 (50K train / 10K test). The architecture is intentionally kept simple — optimizer differences are most legible at this scale before depth effects dominate.
+A shallow CNN trained on CIFAR-10 (50K train / 10K test). The architecture is intentionally kept simple optimizer differences are most legible at this scale before depth effects dominate.
 
 ```
 Input (3 × 32 × 32)
@@ -86,7 +86,7 @@ Beyond final accuracy, we track:
 
 ### 1. Convergence speed and generalization trade off systematically
 
-SGD+Momentum achieved the best final validation accuracy (76.7%) despite not being the fastest to converge early. Adam converged faster in the first 10 epochs but plateaued 3.7 percentage points below SGD+Momentum — consistent with the generalization gap reported in Wilson et al. (2017) and Keskar & Socher (2017).
+SGD+Momentum achieved the best final validation accuracy (76.7%) despite not being the fastest to converge early. Adam converged faster in the first 10 epochs but plateaued 3.7 percentage points below SGD+Momentum consistent with the generalization gap reported in Wilson et al. (2017) and Keskar & Socher (2017).
 
 | Optimizer | Final Val Acc | Epochs to 90% | Total Time (s) |
 |---|---|---|---|
@@ -95,11 +95,11 @@ SGD+Momentum achieved the best final validation accuracy (76.7%) despite not bei
 | Adam | 73.0% | 14 | 533 |
 | RMSprop | 70.4% | 23 | 530 |
 | Adagrad | 67.4% | 30 | 525 |
-| L-BFGS | diverged | — | 1861 |
+| L-BFGS | diverged | - | 1861 |
 
 ### 2. Loss landscape geometry explains the generalization gap
 
-Filter-normalized loss surface visualizations show that SGD+Momentum converges to a qualitatively flatter basin than Adam. Wider contours correspond to solutions more robust to weight perturbation — directly relevant to the stability of compressed gradient updates in distributed training, where each worker's gradient is an imperfect approximation of the true gradient.
+Filter-normalized loss surface visualizations show that SGD+Momentum converges to a qualitatively flatter basin than Adam. Wider contours correspond to solutions more robust to weight perturbation directly relevant to the stability of compressed gradient updates in distributed training, where each worker's gradient is an imperfect approximation of the true gradient.
 
 ### 3. Gradient sparsity patterns differ across optimizers
 
@@ -107,7 +107,7 @@ Per-parameter normalization in adaptive methods (Adam, RMSprop) produces higher 
 
 ### 4. L-BFGS is incompatible with the mini-batch setting
 
-L-BFGS diverged immediately (loss → NaN at epoch 1) with batch size 128. The Hessian approximation requires consistent gradient estimates across steps — which mini-batch noise destroys. Despite 211K gradient evaluations (20× first-order methods), it failed to learn, confirming that second-order structure requires either full-batch gradients or noise-robust curvature approximations.
+L-BFGS diverged immediately (loss → NaN at epoch 1) with batch size 128. The Hessian approximation requires consistent gradient estimates across steps which mini-batch noise destroys. Despite 211K gradient evaluations (20× first-order methods), it failed to learn, confirming that second-order structure requires either full-batch gradients or noise-robust curvature approximations.
 
 ---
 
@@ -141,9 +141,9 @@ In data-parallel distributed training, gradients must be aggregated across worke
 Two properties of the gradient govern compressibility:
 
 - **Sparsity**: near-zero elements can be dropped with no information loss (top-k sparsification)
-- **Low effective rank**: approximately low-rank gradient matrices can be communicated as factor pairs — the key insight behind PowerSGD (Vogels, Karimireddy, & Jaggi, 2019)
+- **Low effective rank**: approximately low-rank gradient matrices can be communicated as factor pairs the key insight behind PowerSGD (Vogels, Karimireddy, & Jaggi, 2019)
 
-The gradient sparsity trajectories in this study suggest that adaptive optimizers produce more compressible gradient signals mid-training, but converge to sharper minima that may be less robust to the approximation error introduced by compression. This creates a tension: the optimizer most amenable to gradient compression may not be the optimizer best suited for generalization — a tradeoff that becomes especially relevant in non-IID federated settings where both gradient variance and communication constraints are simultaneously active.
+The gradient sparsity trajectories in this study suggest that adaptive optimizers produce more compressible gradient signals mid-training, but converge to sharper minima that may be less robust to the approximation error introduced by compression. This creates a tension: the optimizer most amenable to gradient compression may not be the optimizer best suited for generalization  a tradeoff that becomes especially relevant in non-IID federated settings where both gradient variance and communication constraints are simultaneously active.
 
 ---
 
@@ -155,7 +155,7 @@ This study examines optimizer behavior in an idealized single-machine, IID setti
 Test whether the sparsity advantage of adaptive methods translates to measurable communication savings when combined with top-k sparsification or low-rank compression (PowerSGD). Measure the accuracy-compression tradeoff for each optimizer separately.
 
 **Non-IID data distributions**  
-Real federated learning settings involve heterogeneous data across workers. Examine how optimizer convergence properties change when local data distributions diverge — increasing both gradient noise and cross-worker gradient variance simultaneously.
+Real federated learning settings involve heterogeneous data across workers. Examine how optimizer convergence properties change when local data distributions diverge increasing both gradient noise and cross-worker gradient variance simultaneously.
 
 **Noise-robust curvature approximation**  
 L-BFGS fails in the mini-batch setting due to gradient noise. Investigate whether variance reduction (SVRG, SARAH) can stabilize second-order methods at practical batch sizes, and at what gradient evaluation budget this becomes worthwhile.
@@ -229,4 +229,4 @@ python loss_landscape.py --optimizer Adam    # visualize loss landscape
 
 ---
 
-*Author: Ajinkya Avinash Awari — Savitribai Phule Pune University*
+*Author: Ajinkya Avinash Awari Savitribai Phule Pune University*
